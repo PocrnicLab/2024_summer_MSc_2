@@ -42,8 +42,6 @@ cd $ENSEMBLECNV
 chmod +x create_new_project.sh
 
 ./create_new_project.sh $WKDIR
-
-mkdir -p ${PIPELINE}/03_Generate_Input_Files/results
 ## 1 Initial call =============================================================
 
 ## Define the directory for R libraries
