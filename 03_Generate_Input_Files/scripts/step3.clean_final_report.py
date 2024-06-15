@@ -4,7 +4,7 @@
 import argparse
 import pandas as pd
 
-def filter_data(final_report_path, qc_individuals_path, qc_snps_path, output_path):
+def filter_data(final_report_path, qc_individuals_path, qc_snps_path, phenotype_path, output_path):
     # Read file content
     with open(final_report_path, 'r') as file:
         lines = file.readlines()
@@ -25,12 +25,33 @@ def filter_data(final_report_path, qc_individuals_path, qc_snps_path, output_pat
     # Read QC passed individual IDs
     with open(qc_individuals_path, 'r') as file:
         qc_individuals = set(line.strip().split()[0] for line in file)
-    num_samples = len(qc_individuals)
 
     # Read QC passed SNPs
     with open(qc_snps_path, 'r') as file:
         qc_snps = set(line.strip() for line in file)
-    num_snps = len(qc_snps)
+
+    # Read phenotype file and get valid sample IDs
+    phenotype_df = pd.read_csv(phenotype_path, delimiter='\s+')  # Using \s+ to handle whitespace-delimited files
+    #print("Phenotype file columns:", phenotype_df.columns)  # Debugging line to print columns of the phenotype file
+    if 'idanim' not in phenotype_df.columns:
+        raise KeyError("The phenotype file does not contain the column 'idanim'. Please check the column names.")
+
+    valid_samples = set(phenotype_df['idanim'])
+
+    # Filter data
+    filtered_data_lines = []
+    for line in data_lines:
+        parts = line.split("\t")
+        sample_id = parts[0]
+        snp_name = parts[3]
+        if sample_id in qc_individuals and snp_name in qc_snps and sample_id in valid_samples:
+            filtered_data_lines.append(line)
+
+    # Calculate the number of filtered samples and SNPs
+    filtered_samples = {line.split("\t")[0] for line in filtered_data_lines}
+    filtered_snps = {line.split("\t")[3] for line in filtered_data_lines}
+    num_samples = len(filtered_samples)
+    num_snps = len(filtered_snps)
 
     # Update Num SNPs and Num Samples values in the header
     new_header = []
@@ -41,15 +62,6 @@ def filter_data(final_report_path, qc_individuals_path, qc_snps_path, output_pat
             new_header.append(f"Num Samples     {num_samples}\n")
         else:
             new_header.append(line)
-
-    # Filter data
-    filtered_data_lines = []
-    for line in data_lines:
-        parts = line.split("\t")
-        sample_id = parts[0]
-        snp_name = parts[3]
-        if sample_id in qc_individuals and snp_name in qc_snps:
-            filtered_data_lines.append(line)
 
     # Write filtered results
     with open(output_path, 'w') as file:
@@ -62,11 +74,12 @@ def main():
     parser.add_argument('--final_report_path', required=True, help='Path to the final report file')
     parser.add_argument('--qc_individuals_path', required=True, help='Path to the QC passed individuals file')
     parser.add_argument('--qc_snps_path', required=True, help='Path to the QC passed SNPs file')
+    parser.add_argument('--phenotype_path', required=True, help='Path to the phenotype file')
     parser.add_argument('--output_path', required=True, help='Path to save the filtered report')
 
     args = parser.parse_args()
 
-    filter_data(args.final_report_path, args.qc_individuals_path, args.qc_snps_path, args.output_path)
+    filter_data(args.final_report_path, args.qc_individuals_path, args.qc_snps_path, args.phenotype_path, args.output_path)
 
 if __name__ == "__main__":
     main()
