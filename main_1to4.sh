@@ -12,6 +12,8 @@ ENSEMBLECNV=${PIPELINE}/04_Run_EnsembleCNV
 ## Working directory for a ensemble new project
 WKDIR=${PIPELINE}/04a_EnsembleCNV_Working_Directory
 #====================================================================================================
+cd ${PIPELINE}
+
 module load python/3.11.4
 module load R/4.3.0
 
@@ -94,7 +96,6 @@ python ${PIPELINE}/03_Generate_Input_Files/scripts/step3.clean_final_report.py \
 --final_report_path ${PIPELINE}/03_Generate_Input_Files/results/no_qc_final_report.txt \
 --qc_individuals_path ${PIPELINE}/02_Quality_Control_by_Plink/results/plink_results/filtered_data_final_individuals.txt \
 --qc_snps_path ${PIPELINE}/02_Quality_Control_by_Plink/results/plink_results/filtered_data_final_snps.txt \
---phenotype_path ${PHENOTYPE} \
 --output_path ${WKDIR}/data/final_report.txt
 #====================================================================================================
 # generate samples table file for ensembleCNV
