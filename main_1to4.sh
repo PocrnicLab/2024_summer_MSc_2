@@ -12,8 +12,6 @@ ENSEMBLECNV=${PIPELINE}/04_Run_EnsembleCNV
 ## Working directory for a ensemble new project
 WKDIR=${PIPELINE}/04a_EnsembleCNV_Working_Directory
 #====================================================================================================
-cd ${PIPELINE}
-
 module load python/3.11.4
 module load R/4.3.0
 
@@ -102,7 +100,6 @@ python ${PIPELINE}/03_Generate_Input_Files/scripts/step3.clean_final_report.py \
 Rscript ${PIPELINE}/03_Generate_Input_Files/scripts/step4.generate_samples_table.R \
 ${WKDIR}/data/final_report.txt \
 ${WKDIR}/data/Samples_Table.txt
-
 
 #****************************************PART4****************************************
 
@@ -357,9 +354,7 @@ python ${WKDIR}/06_performance_assessment/step3.clean_cnv.py \
 ${WKDIR}/06_performance_assessment/results/final_cnvr_type.txt \
 ${WKDIR}/03_create_CNVR/cnv_create.txt \
 ${WKDIR}/06_performance_assessment/results/final_cnv.txt \
-${WKDIR}/06_performance_assessment/results/final_cnv_filted_out.txt \
-${PHENOTYPE} \
-${WKDIR}/06_performance_assessment/results/filtered_phenotype.txt
+${WKDIR}/06_performance_assessment/results/final_cnv_filted_out.txt
 
 # step4.cnv statistics
 python ${WKDIR}/06_performance_assessment/step4.cnv_stats.py \
