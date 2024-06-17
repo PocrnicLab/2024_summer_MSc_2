@@ -108,30 +108,6 @@ ${WKDIR}/data/Samples_Table.txt
 
 ## 1 Initial call =============================================================
 
-## Define the directory for R libraries
-R_LIBS_DIR="/exports/cmvm/eddie/eb/groups/PocrnicLab/2024_ms_cnv/02_Tools_and_Computational_Environment/R_libs/"
-
-## Check if the directory exists, if not, create it
-if [ ! -d "$R_LIBS_DIR" ]; then
-    mkdir -p "$R_LIBS_DIR"
-fi
-
-## Set R_LIBS environment variable
-export R_LIBS=$R_LIBS_DIR
-
-## Install necessary R packages if not already installed
-Rscript -e "
-packages <- c('cowplot', 'data.table', 'dplyr', 'ggplot2', 'gridExtra', 'mclust', 'mixtools', 'modeest', 'optparse', 'pheatmap', 'plyr', 'RColorBrewer', 'Rcpp', 'RcppArmadillo', 'tibble')
-install_if_missing <- function(p) {
-  if (!require(p, character.only = TRUE, quietly = TRUE)) {
-    install.packages(p, lib = '$R_LIBS_DIR', repos = 'http://cran.us.r-project.org')
-  }
-}
-invisible(sapply(packages, install_if_missing))
-"
-
-## 1 Initial call =============================================================
-
 ### Prepare chromosome-wise LRR and BAF matrices for CNV genotyping -----------
 
 #### (1) Create LRR and BAF (tab delimited) matrices from final report
@@ -381,7 +357,9 @@ python ${WKDIR}/06_performance_assessment/step3.clean_cnv.py \
 ${WKDIR}/06_performance_assessment/results/final_cnvr_type.txt \
 ${WKDIR}/03_create_CNVR/cnv_create.txt \
 ${WKDIR}/06_performance_assessment/results/final_cnv.txt \
-${WKDIR}/06_performance_assessment/results/final_cnv_filted_out.txt
+${WKDIR}/06_performance_assessment/results/final_cnv_filted_out.txt \
+${PHENOTYPE} \
+${WKDIR}/06_performance_assessment/results/filtered_phenotype.txt
 
 # step4.cnv statistics
 python ${WKDIR}/06_performance_assessment/step4.cnv_stats.py \
