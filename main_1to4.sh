@@ -12,6 +12,8 @@ ENSEMBLECNV=${PIPELINE}/04_Run_EnsembleCNV
 ## Working directory for a ensemble new project
 WKDIR=${PIPELINE}/04a_EnsembleCNV_Working_Directory
 #====================================================================================================
+cd ${PIPELINE}
+
 module load python/3.11.4
 module load R/4.3.0
 
@@ -52,7 +54,6 @@ ${PIPELINE}/01_Data/results/new_snp_map_16022022_Ovine50K_4.txt \
 ${FINALREPORT} \
 ${PIPELINE}/01_Data/results/new_final_report_16022022_Ovine50K_4.txt
 
-
 #****************************************PART2****************************************
 mkdir -p ${PIPELINE}/02_Quality_Control_by_Plink/results
 
@@ -70,7 +71,6 @@ cd ${PIPELINE}/02_Quality_Control_by_Plink/results
 bash ${PIPELINE}/02_Quality_Control_by_Plink/scripts/step2.run_plink.sh \
 ${PIPELINE}/02_Quality_Control_by_Plink/results
 
-
 #****************************************PART3****************************************
 ## Create a new project
 cd $ENSEMBLECNV
@@ -81,6 +81,7 @@ chmod +x create_new_project.sh
 mkdir -p ${PIPELINE}/03_Generate_Input_Files/results
 ## copy centromere to working directory
 cp ${PIPELINE}/01_Data/data/centromere.txt ${WKDIR}/data/centromere.txt
+
 #====================================================================================================
 # generate final report files for ensembleCNV
 python ${PIPELINE}/03_Generate_Input_Files/scripts/step2.generate_final_report.py \
@@ -88,6 +89,7 @@ python ${PIPELINE}/03_Generate_Input_Files/scripts/step2.generate_final_report.p
 --map_path ${PIPELINE}/01_Data/results/new_snp_map_16022022_Ovine50K_4.txt \
 --output_path ${PIPELINE}/03_Generate_Input_Files/results/no_qc_final_report.txt \
 --missing_data_output_path ${PIPELINE}/03_Generate_Input_Files/results/missing_data_report.txt
+
 #====================================================================================================
 # clean final report files for ensembleCNV based on plink results
 python ${PIPELINE}/03_Generate_Input_Files/scripts/step3.clean_final_report.py \
@@ -95,6 +97,7 @@ python ${PIPELINE}/03_Generate_Input_Files/scripts/step3.clean_final_report.py \
 --qc_individuals_path ${PIPELINE}/02_Quality_Control_by_Plink/results/plink_results/filtered_data_final_individuals.txt \
 --qc_snps_path ${PIPELINE}/02_Quality_Control_by_Plink/results/plink_results/filtered_data_final_snps.txt \
 --output_path ${WKDIR}/data/final_report.txt
+
 #====================================================================================================
 # generate samples table file for ensembleCNV
 Rscript ${PIPELINE}/03_Generate_Input_Files/scripts/step4.generate_samples_table.R \
