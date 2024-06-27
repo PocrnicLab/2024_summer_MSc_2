@@ -6,6 +6,11 @@ import argparse
 def main(genotype_file, snp_map_file, ped_file, map_file):
     # Load SNP mapping data
     snp_map_df = pd.read_csv(snp_map_file, sep='\t')
+    
+    # Filter SNPs to include only those on chromosomes 1-26
+    valid_chromosomes = [str(i) for i in range(1, 27)]
+    snp_map_df = snp_map_df[snp_map_df['Chromosome'].isin(valid_chromosomes)]
+    
     snp_map = snp_map_df[['Name', 'Chromosome', 'Position']]
 
     # Load genotype data
