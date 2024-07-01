@@ -17,11 +17,11 @@ def update_positions(file1_path, file2_path, output_path):
     # Select necessary columns, keeping only rows present in file1
     result_df = merged_df[file2.columns]
     
-    # Filter out rows where Chromosome or Position is 0
-    result_df = result_df[(result_df['Chromosome'] != 0) & (result_df['Position'] != 0)]
-    
     # Sort the result by Index
     result_df = result_df.sort_values(by='Index')
+    
+    # Filter out rows where Position is 0
+    result_df = result_df[result_df['Position'] != 0]
     
     # Write the result to the output file
     result_df.to_csv(output_path, sep='\t', index=False)
