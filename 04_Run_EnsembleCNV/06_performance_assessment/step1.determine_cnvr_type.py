@@ -34,6 +34,8 @@ def main(cnvr_file_path, cnv_file_path, output_file_path):
         cnvr_chr = cnvr_row['chr']
         cnvr_start = cnvr_row['posStart']
         cnvr_end = cnvr_row['posEnd']
+        start_snp = cnvr_row['start_snp']
+        end_snp = cnvr_row['end_snp']
 
         # Find all CNVs within the range of CNVR
         cnv_in_cnvr = cnv_df[(cnv_df['chr'] == cnvr_chr) & 
@@ -48,10 +50,10 @@ def main(cnvr_file_path, cnv_file_path, output_file_path):
             cnvr_type = 'Undefined'  # If no CNVs, type is undefined
 
         # Add results to the list
-        result.append([cnvr_row['CNVR_ID'], cnvr_row['chr'], cnvr_row['arm'], cnvr_row['posStart'], cnvr_row['posEnd'], cnvr_type])
+        result.append([cnvr_row['CNVR_ID'], cnvr_row['chr'], cnvr_row['arm'], cnvr_row['posStart'], cnvr_row['posEnd'], start_snp, end_snp, cnvr_type])
 
     # Convert results to DataFrame and save
-    result_df = pd.DataFrame(result, columns=['CNVR_ID', 'chr', 'arm', 'posStart', 'posEnd', 'Type'])
+    result_df = pd.DataFrame(result, columns=['CNVR_ID', 'chr', 'arm', 'posStart', 'posEnd', 'start_snp', 'end_snp', 'Type'])
     try:
         result_df.to_csv(output_file_path, index=False, sep='\t', encoding='utf-8')
         print("CNVR types have been successfully determined and saved to:", output_file_path)
