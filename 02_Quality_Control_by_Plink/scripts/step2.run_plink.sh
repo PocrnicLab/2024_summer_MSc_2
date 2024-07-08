@@ -28,7 +28,7 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-# HWE filtering: remove SNPs with Hardy-Weinberg equilibrium p-value less than 0.01
+# HWE filtering: remove SNPs with Hardy-Weinberg equilibrium p-value less than 0.001
 plink --bfile ${output_prefix}_maf --hwe 0.001 --make-bed --out ${output_prefix}_hwe --allow-extra-chr
 if [[ $? -ne 0 ]]; then
     echo "Error: PLINK command failed at HWE filtering step."
