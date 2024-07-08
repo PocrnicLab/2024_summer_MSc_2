@@ -102,6 +102,3 @@ tryCatch({
 }, error = function(e) {
   stop("Error saving the plot: ", opt$output_plot_path)
 })
-
-# Display the plot
-print(plot)
