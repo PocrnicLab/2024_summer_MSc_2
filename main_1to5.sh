@@ -381,7 +381,8 @@ ${WKDIR}/06_performance_assessment/results/final_samples.txt
 Rscript ${WKDIR}/06_performance_assessment/step6.plot_cnvr_distribution.R \
 -c ${PIPELINE}/01_Data/data/chromosome_size.xlsx \
 -n ${WKDIR}/06_performance_assessment/results/final_cnvr_type.txt \
--o ${WKDIR}/06_performance_assessment/results/cnvr_distribution.png
+-o ${WKDIR}/06_performance_assessment/results/cnvr_distribution.png \
+-s ${WKDIR}/06_performance_assessment/results/cnvr_distribution_stats.csv
 
 # step6a.plot cnvr frequency
 Rscript ${WKDIR}/06_performance_assessment/step6a.plot_frequency_spectrum.R \
@@ -464,3 +465,8 @@ run_cnv_gwas() {
 for trait in milk fat prot; do
   run_cnv_gwas $trait
 done
+
+# Run phenotype statistic
+python ${PIPELINE}/05_CNV_GWAS/scripts/step7.phenotype_statistic.py \
+${PHENOTYPE} \
+${PIPELINE}/05_CNV_GWAS/results/phenotype_statistics.txt
