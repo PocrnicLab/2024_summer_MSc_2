@@ -68,11 +68,13 @@ cnvr_data <- cnvr_data %>%
 
 # Calculate CNVR statistics
 cnvr_stats <- cnvr_data %>%
-  group_by(chr, Type) %>%
-  summarise(count = n()) %>%
-  mutate(total = sum(count)) %>%
-  ungroup() %>%
-  mutate(proportion = count / sum(count))
+  group_by(chr) %>%
+  summarise(
+    Gain = sum(Type == "Gain"),
+    Loss = sum(Type == "Loss"),
+    Mixed = sum(Type == "Mixed"),
+    Total = n()
+  )
 
 # Save CNVR statistics to a file
 write.csv(cnvr_stats, opt$output_stats_path, row.names = FALSE)
