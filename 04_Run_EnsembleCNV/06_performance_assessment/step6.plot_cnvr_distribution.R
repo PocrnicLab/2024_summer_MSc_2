@@ -13,15 +13,17 @@ option_list <- list(
   make_option(c("-n", "--cnvr_data_path"), type = "character", default = NULL, 
               help = "Path to the final CNVR types file", metavar = "character"),
   make_option(c("-o", "--output_plot_path"), type = "character", default = NULL, 
-              help = "Path to save the output plot", metavar = "character")
+              help = "Path to save the output plot", metavar = "character"),
+  make_option(c("-s", "--output_stats_path"), type = "character", default = NULL, 
+              help = "Path to save the output statistics file", metavar = "character")
 )
 
 opt_parser <- OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
-if (is.null(opt$chromosome_data_path) || is.null(opt$cnvr_data_path) || is.null(opt$output_plot_path)) {
+if (is.null(opt$chromosome_data_path) || is.null(opt$cnvr_data_path) || is.null(opt$output_plot_path) || is.null(opt$output_stats_path)) {
   print_help(opt_parser)
-  stop("All arguments must be supplied (chromosome_data_path, cnvr_data_path, output_plot_path).", call. = FALSE)
+  stop("All arguments must be supplied (chromosome_data_path, cnvr_data_path, output_plot_path, output_stats_path).", call. = FALSE)
 }
 
 # Function to read data safely
@@ -54,7 +56,7 @@ cnvr_data <- cnvr_data %>%
   mutate(chr = as.numeric(gsub("chr", "", chr)))
 
 # Set colors for CNVR types
-cnvr_colors <- c("Gain" = "purple", "Loss" = "green", "Mixed" = "darkblue")
+cnvr_colors <- c("Gain" = "red", "Loss" = "green", "Mixed" = "purple")
 
 # Create chromosome length dataframe
 chromosome_data <- chromosome_data %>%
@@ -63,6 +65,17 @@ chromosome_data <- chromosome_data %>%
 # Create CNVR dataframe and add color column
 cnvr_data <- cnvr_data %>%
   mutate(color = cnvr_colors[Type])
+
+# Calculate CNVR statistics
+cnvr_stats <- cnvr_data %>%
+  group_by(chr, Type) %>%
+  summarise(count = n()) %>%
+  mutate(total = sum(count)) %>%
+  ungroup() %>%
+  mutate(proportion = count / sum(count))
+
+# Save CNVR statistics to a file
+write.csv(cnvr_stats, opt$output_stats_path, row.names = FALSE)
 
 # Plot the CNVR distribution
 p <- ggplot() +
@@ -84,6 +97,3 @@ tryCatch({
 }, error = function(e) {
   stop("Error saving the plot: ", opt$output_plot_path)
 })
-
-# Display the plot
-print(p)
