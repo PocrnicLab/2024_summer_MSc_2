@@ -14,8 +14,27 @@ def determine_cnvr_type(cn_values):
     else:
         return 'Undefined'
 
+def merge_overlapping_cnvr(cnvr_df):
+    merged_cnvr = []
+    current_cnvr = None
+
+    for index, row in cnvr_df.iterrows():
+        if current_cnvr is None:
+            current_cnvr = row
+        else:
+            if row['chr'] == current_cnvr['chr'] and row['posStart'] <= current_cnvr['posEnd']:
+                current_cnvr['posEnd'] = max(current_cnvr['posEnd'], row['posEnd'])
+                current_cnvr['end_snp'] = row['end_snp']
+            else:
+                merged_cnvr.append(current_cnvr)
+                current_cnvr = row
+
+    if current_cnvr is not None:
+        merged_cnvr.append(current_cnvr)
+
+    return pd.DataFrame(merged_cnvr)
+
 def main(cnvr_file_path, cnv_file_path, output_file_path):
-    # Load files with error handling
     try:
         cnvr_df = pd.read_csv(cnvr_file_path, sep='\t', encoding='utf-8')
         cnv_df = pd.read_csv(cnv_file_path, sep='\t', encoding='utf-8')
@@ -23,13 +42,16 @@ def main(cnvr_file_path, cnv_file_path, output_file_path):
         print(f"Error reading files: {e}")
         raise
 
-    # Extract necessary columns
     cnv_df = cnv_df[['chr', 'posStart', 'posEnd', 'CN']]
+    
+    # Sort CNVRs by chromosome and start position
+    cnvr_df = cnvr_df.sort_values(by=['chr', 'posStart'])
 
-    # Initialize results list
+    # Merge overlapping CNVRs
+    cnvr_df = merge_overlapping_cnvr(cnvr_df)
+
     result = []
 
-    # Process each CNVR
     for index, cnvr_row in cnvr_df.iterrows():
         cnvr_chr = cnvr_row['chr']
         cnvr_start = cnvr_row['posStart']
@@ -37,22 +59,18 @@ def main(cnvr_file_path, cnv_file_path, output_file_path):
         start_snp = cnvr_row['start_snp']
         end_snp = cnvr_row['end_snp']
 
-        # Find all CNVs within the range of CNVR
         cnv_in_cnvr = cnv_df[(cnv_df['chr'] == cnvr_chr) & 
                              (cnv_df['posStart'] >= cnvr_start) & 
                              (cnv_df['posEnd'] <= cnvr_end)]
 
-        # If CNVs are present, determine the type
         if not cnv_in_cnvr.empty:
             cn_values = cnv_in_cnvr['CN'].tolist()
             cnvr_type = determine_cnvr_type(cn_values)
         else:
-            cnvr_type = 'Undefined'  # If no CNVs, type is undefined
+            cnvr_type = 'Undefined'
 
-        # Add results to the list
         result.append([cnvr_row['CNVR_ID'], cnvr_row['chr'], cnvr_row['arm'], cnvr_row['posStart'], cnvr_row['posEnd'], start_snp, end_snp, cnvr_type])
 
-    # Convert results to DataFrame and save
     result_df = pd.DataFrame(result, columns=['CNVR_ID', 'chr', 'arm', 'posStart', 'posEnd', 'start_snp', 'end_snp', 'Type'])
     try:
         result_df.to_csv(output_file_path, index=False, sep='\t', encoding='utf-8')
