@@ -423,7 +423,7 @@ run_cnv_gwas() {
   mkdir -p ${PIPELINE}/05_CNV_GWAS/results/${trait}
   cd ${PIPELINE}/05_CNV_GWAS/results/${trait}
 
-  # Extract phenotraits information
+  # Extract phenotypes information
   python ${PIPELINE}/05_CNV_GWAS/scripts/step1.extract_phenotypes_parityC.py \
   ${PHENOTYPE} \
   ${PIPELINE}/05_CNV_GWAS/results/${trait}/phenotypes.txt \
