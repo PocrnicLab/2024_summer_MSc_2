@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import hypergeom
 from statsmodels.stats.multitest import multipletests
 import argparse
+import sys
 
 def read_file(file_path, sep, names=None, comment=None):
     try:
@@ -46,6 +47,13 @@ def main(qtls_file, gff_file, output_file):
             merged_df = pd.merge(db_counts, name_counts, left_on='Name', right_on='Name', how='inner').fillna(0)
             bubble_merged_df = pd.merge(merged_df, bubble_counts, left_on='Name', right_on='Name', how='inner').fillna(0)
 
+            if merged_df.empty:
+                print("Error: Merged DataFrame is empty. Check if 'Name' columns have common values.")
+                return
+
+            print("Merged DataFrame:")
+            print(merged_df.head())
+
             total_qtls = merged_df['Observed Number of QTLs'].sum()
 
             p_values = []
@@ -55,9 +63,18 @@ def main(qtls_file, gff_file, output_file):
                 observed_qtls = row['Observed Number of QTLs']
                 k = observed_qtls
                 N = total_qtls
-                n = row['Proportion'] * gff_df.shape[0]
+                n = round(row['Proportion'] * gff_df.shape[0])
                 M = gff_df.shape[0]
-                p_value = hypergeom.sf(k-1, M, n, N)
+
+                # Debugging print statements
+                print(f"Index: {index}, Name: {row['Name']}, k: {k}, N: {N}, n: {n}, M: {M}")
+
+                # Check the conditions to avoid invalid parameters
+                if N <= 0 or M <= 0 or n < 0 or k < 0:
+                    p_value = np.nan
+                else:
+                    p_value = hypergeom.sf(k-1, M, n, N)
+                
                 p_values.append(p_value)
                 
                 richness_factor = k / n if n > 0 else np.nan
@@ -66,18 +83,41 @@ def main(qtls_file, gff_file, output_file):
             if len(p_values) == len(merged_df) and len(richness_factors) == len(merged_df):
                 merged_df['P_value'] = p_values
                 merged_df['Richness Factor'] = richness_factors
-                merged_df['P_value'] = merged_df['P_value'].replace(0, 1e-300)
+
                 _, fdr_corrected_p_values, _, _ = multipletests(merged_df['P_value'], method='fdr_bh')
                 merged_df['FDR_P_value'] = fdr_corrected_p_values
+
+                merged_df['FDR_P_value'] = merged_df['FDR_P_value'].replace([0, np.nan], 1e-300)
                 merged_df['-log10(FDR_P_value)'] = -np.log10(merged_df['FDR_P_value'])
 
                 final_df = pd.merge(merged_df, bubble_merged_df[['Name', 'Bubble Size']], left_on='Name', right_on='Name', how='inner')
                 
+                if final_df.empty:
+                    print("Error: Final DataFrame is empty after merging.")
+                    return
+
+                print("Final DataFrame:")
+                print(final_df.head())
+
+                if final_df['Richness Factor'].isnull().any():
+                    print("Error: Richness Factor column contains NaN values.")
+                    return
+
+                if final_df['-log10(FDR_P_value)'].isnull().any():
+                    print("Error: -log10(FDR_P_value) column contains NaN values.")
+                    return
+
+                print("Checking if final DataFrame columns contain valid data:")
+                print("Richness Factor column:", final_df['Richness Factor'].head())
+                print("Name column:", final_df['Name'].head())
+                print("Bubble Size column:", final_df['Bubble Size'].head())
+                print("-log10(FDR_P_value) column:", final_df['-log10(FDR_P_value)'].head())
+
                 plt.figure(figsize=(15, 10))
                 scatter = plt.scatter(
                     final_df['Richness Factor'],
                     final_df['Name'],
-                    s=final_df['Bubble Size'] * 100, # Size based on Bubble Size
+                    s=final_df['Bubble Size'] * 100, 
                     c=final_df['-log10(FDR_P_value)'],
                     cmap='coolwarm',
                     alpha=0.6,
@@ -91,7 +131,7 @@ def main(qtls_file, gff_file, output_file):
                     plt.text(
                         final_df['Richness Factor'].iloc[i],
                         final_df['Name'].iloc[i],
-                        str(final_df['Bubble Size'].iloc[i]), # Display number of QTLs without deduplication
+                        str(final_df['Bubble Size'].iloc[i]), 
                         fontsize=8,
                         ha='center',
                         va='center',
@@ -102,7 +142,7 @@ def main(qtls_file, gff_file, output_file):
                 cbar.set_label('-log10(FDR_P_value)')
 
                 plt.grid(True, axis='x')
-                plt.savefig(output_file)  # Save the plot as a PNG file
+                plt.savefig(output_file)  
             else:
                 print("Error: Length of p_values or richness_factors does not match length of merged_df.")
 
