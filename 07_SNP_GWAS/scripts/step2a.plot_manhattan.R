@@ -50,11 +50,12 @@ chromosome_labels <- as.character(chromosome_size$Chromosome)
 
 # Plot Manhattan plot
 png(output_file, width = 12, height = 8, units = "in", res = 300)
-manhattan(manhattan_data, main = "Manhattan Plot", col = c("blue4", "orange3"), chrlabs = chromosome_labels)
+#manhattan(manhattan_data, main = "Manhattan Plot", col = c("black", "gray"), chrlabs = chromosome_labels)
+manhattan(manhattan_data, main = "", col = c("black", "gray"), chrlabs = chromosome_labels)
 
 # Add horizontal lines for p-value thresholds 0.05 and 0.1
-abline(h = -log10(0.05), col = "red", lty = 2)  # p-value threshold 0.05
-abline(h = -log10(0.1), col = "green", lty = 2)  # p-value threshold 0.1
+abline(h = -log10(0.05), col = "red", lty = 1)  # p-value threshold 0.05
+abline(h = -log10(0.1), col = "blue", lty = 1)  # p-value threshold 0.1
 
 dev.off()
 
