@@ -53,7 +53,6 @@ def get_kegg_pathways(ncbi_id):
     response = requests.get(url)
     response.raise_for_status()
     
-
     pathways = [line.split('\t')[1] for line in response.text.strip().split('\n') if line]
     return list(set(pathways))
 
@@ -95,11 +94,17 @@ def fetch_gene_info(ensembl_ids):
 def main(input_file, output_file):
     data = pd.read_csv(input_file, delimiter='\t')
     ensembl_ids = data['gene_id'].tolist()
-    gene_info = fetch_gene_info(ensembl_ids)
-    
-    df = pd.DataFrame(gene_info)
+
+    chunk_size = 500
+    all_results = []
+
+    for i in range(0, len(ensembl_ids), chunk_size):
+        chunk = ensembl_ids[i:i + chunk_size]
+        gene_info = fetch_gene_info(chunk)
+        all_results.extend(gene_info)
+
+    df = pd.DataFrame(all_results)
     df.to_csv(output_file, index=False)
-    # print(df)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch Gene Information using Ensembl IDs")

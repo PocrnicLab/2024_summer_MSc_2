@@ -51,8 +51,8 @@ def main(qtls_file, gff_file, output_file):
                 print("Error: Merged DataFrame is empty. Check if 'Name' columns have common values.")
                 return
 
-            print("Merged DataFrame:")
-            print(merged_df.head())
+            #print("Merged DataFrame:")
+            #print(merged_df.head())
 
             total_qtls = merged_df['Observed Number of QTLs'].sum()
 
@@ -65,16 +65,7 @@ def main(qtls_file, gff_file, output_file):
                 N = total_qtls
                 n = round(row['Proportion'] * gff_df.shape[0])
                 M = gff_df.shape[0]
-
-                # Debugging print statements
-                print(f"Index: {index}, Name: {row['Name']}, k: {k}, N: {N}, n: {n}, M: {M}")
-
-                # Check the conditions to avoid invalid parameters
-                if N <= 0 or M <= 0 or n < 0 or k < 0:
-                    p_value = np.nan
-                else:
-                    p_value = hypergeom.sf(k-1, M, n, N)
-                
+                p_value = hypergeom.sf(k-1, M, n, N)
                 p_values.append(p_value)
                 
                 richness_factor = k / n if n > 0 else np.nan
@@ -83,6 +74,7 @@ def main(qtls_file, gff_file, output_file):
             if len(p_values) == len(merged_df) and len(richness_factors) == len(merged_df):
                 merged_df['P_value'] = p_values
                 merged_df['Richness Factor'] = richness_factors
+                merged_df['P_value'] = merged_df['P_value'].replace(0, 1e-300)
 
                 _, fdr_corrected_p_values, _, _ = multipletests(merged_df['P_value'], method='fdr_bh')
                 merged_df['FDR_P_value'] = fdr_corrected_p_values
@@ -96,8 +88,8 @@ def main(qtls_file, gff_file, output_file):
                     print("Error: Final DataFrame is empty after merging.")
                     return
 
-                print("Final DataFrame:")
-                print(final_df.head())
+                #print("Final DataFrame:")
+                #print(final_df.head())
 
                 if final_df['Richness Factor'].isnull().any():
                     print("Error: Richness Factor column contains NaN values.")
@@ -107,11 +99,11 @@ def main(qtls_file, gff_file, output_file):
                     print("Error: -log10(FDR_P_value) column contains NaN values.")
                     return
 
-                print("Checking if final DataFrame columns contain valid data:")
-                print("Richness Factor column:", final_df['Richness Factor'].head())
-                print("Name column:", final_df['Name'].head())
-                print("Bubble Size column:", final_df['Bubble Size'].head())
-                print("-log10(FDR_P_value) column:", final_df['-log10(FDR_P_value)'].head())
+                #print("Checking if final DataFrame columns contain valid data:")
+                #print("Richness Factor column:", final_df['Richness Factor'].head())
+                #print("Name column:", final_df['Name'].head())
+                #print("Bubble Size column:", final_df['Bubble Size'].head())
+                #print("-log10(FDR_P_value) column:", final_df['-log10(FDR_P_value)'].head())
 
                 plt.figure(figsize=(15, 10))
                 scatter = plt.scatter(
@@ -125,7 +117,7 @@ def main(qtls_file, gff_file, output_file):
                     linewidth=0.5
                 )
                 plt.xlabel('Richness Factor')
-                plt.title('Enrichment Analysis Bubble Plot')
+                #plt.title('Enrichment Analysis Bubble Plot')
 
                 for i in range(final_df.shape[0]):
                     plt.text(
@@ -135,14 +127,20 @@ def main(qtls_file, gff_file, output_file):
                         fontsize=8,
                         ha='center',
                         va='center',
-                        color='white'
+                        color='black'
                     )
 
                 cbar = plt.colorbar(scatter)
                 cbar.set_label('-log10(FDR_P_value)')
 
                 plt.grid(True, axis='x')
-                plt.savefig(output_file)  
+                plt.savefig(output_file)
+                
+                # Save the final DataFrame to a CSV file
+                csv_output_file = output_file.replace('.png', '.csv')
+                final_df.to_csv(csv_output_file, index=False)
+                print(f"Final DataFrame saved to {csv_output_file}")
+                  
             else:
                 print("Error: Length of p_values or richness_factors does not match length of merged_df.")
 

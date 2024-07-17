@@ -60,7 +60,7 @@ def main(qtls_file, gff_file, output_file):
 
                 k = observed_qtls
                 N = total_qtls
-                n = row['Proportion'] * gff_df.shape[0]
+                n = round(row['Proportion'] * gff_df.shape[0])
                 M = gff_df.shape[0]
                 p_value = hypergeom.sf(k-1, M, n, N)
                 p_values.append(p_value)
@@ -73,14 +73,30 @@ def main(qtls_file, gff_file, output_file):
                 name_chr_counts['Richness Factor'] = richness_factors
                 name_chr_counts['P_value'] = name_chr_counts['P_value'].replace(0, 1e-300)
                 _, fdr_corrected_p_values, _, _ = multipletests(name_chr_counts['P_value'], method='fdr_bh')
+
+                # Replace NaNs in FDR-corrected p-values
+                fdr_corrected_p_values = np.nan_to_num(fdr_corrected_p_values, nan=1e-300)
+
                 name_chr_counts['FDR_P_value'] = fdr_corrected_p_values
                 name_chr_counts['-log10(FDR_P_value)'] = -np.log10(name_chr_counts['FDR_P_value'])
 
                 name_chr_counts['Name - Chr'] = name_chr_counts['Name'] + ' - CHR' + name_chr_counts['chr']
 
                 final_df = pd.merge(name_chr_counts, bubble_merged_df[['Name', 'Chr', 'Bubble Size']], left_on=['Name', 'chr'], right_on=['Name', 'Chr'], how='inner')
-                
+
+                # Debugging: Print final_df to check the data
+                #print("Final DataFrame for plotting:")
+                #print(final_df)
+
                 plt.figure(figsize=(15, 10))
+
+                # Ensure the data does not contain any NaNs or inf values
+                final_df = final_df.replace([np.inf, -np.inf], np.nan).dropna(subset=['Richness Factor', '-log10(FDR_P_value)', 'Bubble Size'])
+
+                # Debugging: Print filtered final_df to check the data
+                #print("Filtered DataFrame for plotting:")
+                #print(final_df)
+
                 scatter = plt.scatter(
                     final_df['Richness Factor'],
                     final_df['Name - Chr'],
@@ -92,7 +108,7 @@ def main(qtls_file, gff_file, output_file):
                     linewidth=0.5
                 )
                 plt.xlabel('Richness Factor')
-                plt.title('Enrichment Analysis Bubble Plot')
+                #plt.title('Enrichment Analysis Bubble Plot')
 
                 for i in range(final_df.shape[0]):
                     plt.text(
@@ -102,7 +118,7 @@ def main(qtls_file, gff_file, output_file):
                         fontsize=8,
                         ha='center',
                         va='center',
-                        color='white'
+                        color='black'
                     )
 
                 cbar = plt.colorbar(scatter)
@@ -110,6 +126,12 @@ def main(qtls_file, gff_file, output_file):
 
                 plt.grid(True, axis='x')
                 plt.savefig(output_file)  # Save the plot as a PNG file
+                
+                # Save the final DataFrame to a CSV file
+                csv_output_file = output_file.replace('.png', '.csv')
+                final_df.to_csv(csv_output_file, index=False)
+                print(f"Final DataFrame saved to {csv_output_file}")
+                
             else:
                 print("Error: Length of p_values or richness_factors does not match length of name_chr_counts.")
 
