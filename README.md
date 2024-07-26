@@ -124,6 +124,6 @@ PVALUEFORCNV=0.10
 PVALUEFORSNP=0.05
 #=====================================================================================
 
-The whole pipeline can be run by typing:
+The whole pipeline can be run easily by typing:
 
 bash main.sh
