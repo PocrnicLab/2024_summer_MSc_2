@@ -13,9 +13,10 @@ The development and testing of the pipeline were conducted on the University of 
 
 PennCNV.1.0.5 was downloaded and installed following the instructions at 
 https://penncnv.openbioinformatics.org/en/latest/user-guide/install/. 
+
 EnsembleCNV was installed from 
 https://github.com/HaoKeLab/ensembleCNV, 
-with code modifications made according to the 2.3 CNV identification software used and operating environment. Additionally, the versions of third-party R packages and Python libraries used are listed below:
+with code modifications made according to the CNV identification software used and operating environment. Additionally, the versions of third-party R packages and Python libraries used are listed below:
 
 Package Name	Programming Language	Version
 
