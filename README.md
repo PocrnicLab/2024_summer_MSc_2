@@ -18,35 +18,62 @@ https://github.com/HaoKeLab/ensembleCNV,
 with code modifications made according to the 2.3 CNV identification software used and operating environment. Additionally, the versions of third-party R packages and Python libraries used are listed below:
 
 Package Name	Programming Language	Version
+
 CNVRanger	R	1.18.1
+
 cowplot	R	1.1.3
+
 dplyr	R	1.1.4
+
 GALLO	R	1.1
+
 ggplot2	R	3.5.1
+
 gridExtra	R	2.3
+
 matplotlib	Python	3.9.0
+
 mclust	R	6.0.1
+
 mixtools	R	2.0.0
+
 modeest	R	2.4.0
+
 numpy	Python	2.0.0
+
 optparse	R	1.7.5
+
 pandas	Python	2.0.3
+
 pheatmap	R	1.0.12
+
 plyr	R	1.8.9
+
 qqman	R	0.1.9
+
 RColorBrewer	R	1.1.3
+
 Rcpp	R	1.0.12
+
 readxl	R	1.4.3
+
 requests	Python	2.32.3
+
 scales	R	1.3.0
+
 scipy	Python	1.14.0
+
 statsmodels	Python	0.14.2
+
 tibble	R	3.2.1
+
 tidyr	R	1.3.1
+
 tools	R	4.3.2
 
 The following part of https://github.com/PocrnicLab/2024_summer_MSc_2/blob/main/main.sh sets up the library and installs necessary packages, which can be deleted if these steps are already done.
-#===============================================================================================
+#=====================================================================================
+
 cd ${PIPELINE}
 
 module load python/3.11.4
@@ -68,7 +95,7 @@ REQUIRED_PKG=("pandas" "matplotlib" "seaborn" "scipy" "numpy" "statsmodels")
 install_packages() 
 
 install_packages
-#===============================================================================================
+#=====================================================================================
 
 # Input files preparation
 The preparation of input files is essential for the operation of the pipeline. In addition to the Illumina final report, the corresponding SNP map and phenotype records, the following files are also required: 
@@ -85,7 +112,8 @@ All external data files except for '.gtf' file are available at https://github.c
 
 # How to use this pipeline
 After define the needed pathway and threshold in main.sh, for example:
-#===============================================================================================
+
+#=====================================================================================
 PIPELINE="/exports/cmvm/eddie/eb/groups/PocrnicLab/2024_ms_cnv/2024_summer_MSc_2"
 PENNCNV="/exports/cmvm/eddie/eb/groups/PocrnicLab/2024_ms_cnv/02_Tools_and_Computational_Environment/PennCNV-1.0.5/"
 FINALREPORT="/exports/cmvm/eddie/eb/groups/PocrnicLab/2024_ms_cnv/01_Data/we_uz_final_report_16022022_Ovine50K_4.txt"
@@ -93,6 +121,8 @@ SNPMAP="/exports/cmvm/eddie/eb/groups/PocrnicLab/2024_ms_cnv/01_Data/we_uz_snp_m
 PHENOTYPE="/exports/cmvm/eddie/eb/groups/PocrnicLab/2024_ms_cnv/01_Data/Pag_sheep_phenotypes_OneRecordPerParity.txt"
 PVALUEFORCNV=0.10
 PVALUEFORSNP=0.05
-#===============================================================================================
+#=====================================================================================
+
 The whole pipeline can be run by typing:
+
 bash main.sh
