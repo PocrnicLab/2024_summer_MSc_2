@@ -3,7 +3,7 @@ This work was completed as part of a master's thesis for a degree in Bioinformat
 
 # Purposes
 This bioinformatics pipeline is designed to analyze SNP data from sheep genotyped with the Illumina OvineSNP50 BeadChip. The pipeline includes data quality control using PLINK, CNV identification with PennCNV, and CNV region (CNVR) analysis via EnsembleCNV. Genome-wide association studies (GWAS) on milk production traits are conducted using both SNPs and CNVs. Functional annotation is performed to identify candidate genes and quantitative trait loci (QTLs) associated with daily milk, fat, and protein production.
-![RP_flowchart_final (1)](https://github.com/user-attachments/assets/6803b86c-e8fc-4d76-ab19-7bdb8184ed02)
+![image](https://github.com/user-attachments/assets/df21f3e3-7178-4d6d-93bb-64aeda96fa30)
 
 # Computational environment setting
 The development and testing of the pipeline were conducted on the University of Edinburgh's compute cluster, Eddie Mark 3, which utilizes the Altair Gridengine batch system on Scientific Linux 7. The software packages R, Python, and PLINK were loaded on the Eddie system using the following module commands: 
